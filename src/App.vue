@@ -2,7 +2,12 @@
   <div class="todo">
     <h1 class="todo__title">Todo list</h1>
     <form class="todo__form" action="/">
-      <input class="todo__input" type="text" name="text" :value="taskValue" placeholder="Search note..."/>
+      <input
+        class="todo__input"
+        type="text"
+        name="text"
+        placeholder="Search note..."
+      />
       <select class="todo__select">
         <option value="all">All</option>
         <option value="complete">Complete</option>
@@ -14,17 +19,31 @@
     <ul class="todo__list">
       <li class="todo-list__item">
         <label>
-          <input class="todo-list__checkbox" type="checkbox">
+          <input class="todo-list__checkbox" type="checkbox" />
           <p>Купить продуктов</p>
         </label>
-      </li>
-      <li class="todo-list__item">
-        <label>
-          <input type="checkbox">
-          <p>Заплатить за интернет</p>
-        </label>
+        <button class="todo-list__edit" type="button">
+          <span class="visually-hidden">Редактировать запись.</span>
+        </button>
+        <button class="todo-list__delete" type="button">
+          <span class="visually-hidden">Удалить запись.</span>
+        </button>
       </li>
     </ul>
+  </div>
+  <button class="todo__new-post" @click="addNewNote" type="button">
+    <span class="visually-hidden">Создать новую заметку.</span>
+  </button>
+
+  <div class="modal">
+    <div class="modal-content">
+      <h2>New Note</h2>
+      <form action="/">
+        <input type="text" placeholder="Input your note..." />
+        <button type="submit">Apply</button>
+        <button type="button">Cancel</button>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -32,18 +51,41 @@
 export default {
   data() {
     return {
+      abcd: "sss",
     };
   },
   methods: {
-    addTask(event) {
-      console.log(event);
+    addNewNote() {
+      console.log(123);
+      // получить див modal
+      // включить класс Modal--show
+      // стилизовать модальное окошко
+      // реализовать ESC и клик вне окошка
     }
   },
 };
 </script>
 
-
 <style scoped>
+.modal {
+  display: none;
+}
+
+.modal--show {
+  display: flex;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip: rect(0 0 0 0);
+}
+
 input[type="text"] {
   width: 100%;
   box-sizing: border-box;
@@ -71,6 +113,7 @@ input[type="text"] {
   display: grid;
   grid-template-columns: 1fr 140px 54px;
   gap: 16px;
+  margin-bottom: 40px;
 }
 
 .todo__input {
@@ -87,6 +130,7 @@ input[type="text"] {
 }
 
 .todo__select {
+  padding-left: 10px;
   font-size: 18px;
   line-height: 24px;
   font-weight: 500;
@@ -141,6 +185,12 @@ input[type="text"] {
   line-height: 24px;
 }
 
+.todo-list__item {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #6c63ff;
+}
+
 .todo-list__checkbox {
   appearance: none;
   width: 26px;
@@ -152,7 +202,75 @@ input[type="text"] {
   cursor: pointer;
 }
 
-.todo-list__checbox:checked {
+.todo-list__checkbox:checked {
+  background-image: url("src/assets/checkbox-on.svg");
+  background-repeat: no-repeat;
+  background-position: center;
   background-color: #6c63ff;
+}
+
+.todo-list__edit,
+.todo-list__delete {
+  position: relative;
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.todo-list__edit {
+  margin-right: 20px;
+  margin-left: auto;
+}
+
+.todo-list__edit::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  background-image: url("src/assets/pencil.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.todo-list__delete {
+  margin-right: 20px;
+}
+
+.todo-list__delete::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  background-image: url("src/assets/trash.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.todo__new-post {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  background: #6c63ff;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+.todo__new-post::before {
+  content: "";
+  position: absolute;
+  top: 11px;
+  left: 13px;
+  width: 24px;
+  height: 24px;
+  background-image: url("../src/assets/plus.svg");
 }
 </style>
