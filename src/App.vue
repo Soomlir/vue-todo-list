@@ -17,15 +17,15 @@
     </form>
 
     <ul class="todo__list">
-      <li class="todo-list__item">
+      <li class="todo-list__item" v-for="todo of todos">
         <label>
           <input class="todo-list__checkbox" type="checkbox" />
-          <p>Купить продуктов</p>
+          <p> {{ todo.task }}</p>
         </label>
         <button class="todo-list__edit" type="button">
           <span class="visually-hidden">Редактировать запись.</span>
         </button>
-        <button class="todo-list__delete" type="button">
+        <button @click="deleteNote" class="todo-list__delete" type="button">
           <span class="visually-hidden">Удалить запись.</span>
         </button>
       </li>
@@ -35,32 +35,46 @@
     <span class="visually-hidden">Создать новую заметку.</span>
   </button>
 
-  <div class="modal">
-    <div class="modal-content">
-      <h2>New Note</h2>
+  <div class="modal" :class="{ 'modal--show': modalShow }">
+    <div class="modal__content">
+      <h2 class="modal__title">New Note</h2>
       <form action="/">
-        <input type="text" placeholder="Input your note..." />
-        <button type="submit">Apply</button>
-        <button type="button">Cancel</button>
+        <input type="text" placeholder="Input your note..." v-model="newTask"/>
+        <button @click="addNewTask" type="button">Apply</button>
+        <button @click="closeModal" type="button">Cancel</button>
       </form>
     </div>
   </div>
 </template>
 
 <script>
+import { remove } from '@vue/shared';
+import { toHandlers } from 'vue';
+
 export default {
   data() {
     return {
-      abcd: "sss",
+      modalShow: false,
+      todos: [
+        {id: 1, task: 'Купить продуктов', status: 'incomplete'}
+      ],
+      id: 2
     };
   },
   methods: {
     addNewNote() {
-      console.log(123);
-      // получить див modal
-      // включить класс Modal--show
-      // стилизовать модальное окошко
-      // реализовать ESC и клик вне окошка
+      this.modalShow = true;
+    },
+    addNewTask() {
+      const obj = {id: ++this.id, task: this.newTask, status: 'incomplete'};
+      this.todos.push(obj);
+      this.modalShow = false;
+    },
+    closeModal() {
+      this.modalShow = false;
+    },
+    deleteNote(event) {
+
     }
   },
 };
@@ -68,11 +82,33 @@ export default {
 
 <style scoped>
 .modal {
+  position: fixed;
+  z-index: 1000;
   display: none;
+  inset: 0;
+  overflow: scroll;
+  overflow-x: scroll;
+  overflow-x: hidden;
 }
 
 .modal--show {
   display: flex;
+}
+
+.modal__content {
+  position: relative;
+  width: 450px;
+  height: 289px;
+  margin: auto;
+  padding: 30px;
+  background-color: #fff;
+  outline: 1px solid #c6c6c6;
+  box-shadow: 0 5px 10px #00010140;
+}
+
+.modal__title {
+  text-transform: uppercase;
+  text-align: center;
 }
 
 .visually-hidden {
