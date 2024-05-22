@@ -1,46 +1,66 @@
 <template>
-  <div class="todo">
-    <h1 class="todo__title">Todo list</h1>
-    <form class="todo__form" action="/">
-      <input
-        class="todo__input"
-        type="text"
-        name="text"
-        placeholder="Search note..."
-      />
-      <select class="todo__select">
-        <option value="all">All</option>
-        <option value="complete">Complete</option>
-        <option value="incomplete">Incomplete</option>
-      </select>
-      <button class="todo__theme-toggle" type="button"></button>
-    </form>
+  <div class="todo-wrapper">
+    <div class="todo">
+      <h1 class="todo__title">Todo list</h1>
+      <form class="todo__form" action="/">
+        <input
+          class="todo__input"
+          type="text"
+          name="text"
+          placeholder="Search note..."
+          v-model="searchFilter"
+        />
+        <select class="todo__select" v-model="searchMode">
+          <option
+            v-for="mode in searchModes"
+            :key="mode"
+            :selected="mode === searchMode"
+          >
+            {{ mode }}
+          </option>
+        </select>
+        <button class="todo__theme-toggle" type="button"></button>
+      </form>
 
-    <ul class="todo__list">
-      <li class="todo-list__item" v-for="todo of todos">
-        <label>
-          <input class="todo-list__checkbox" type="checkbox" />
-          <p> {{ todo.task }}</p>
-        </label>
-        <button class="todo-list__edit" type="button">
-          <span class="visually-hidden">Редактировать запись.</span>
-        </button>
-        <button @click="deleteNote" class="todo-list__delete" type="button">
-          <span class="visually-hidden">Удалить запись.</span>
-        </button>
-      </li>
-    </ul>
+      <ul class="todo__list" v-if="filteredTodos.length">
+        <li
+          class="todo-list__item"
+          v-for="item in filteredTodos"
+          :key="item.id"
+        >
+          <label>
+            <input
+              class="todo-list__checkbox"
+              type="checkbox"
+              v-model="item.done"
+            />
+            <p>{{ item.task }}</p>
+          </label>
+          <button class="todo-list__edit" type="button">
+            <span class="visually-hidden">Редактировать запись.</span>
+          </button>
+          <button
+            @click="deleteNote(item.id)"
+            class="todo-list__delete"
+            type="button"
+          >
+            <span class="visually-hidden">Удалить запись.</span>
+          </button>
+        </li>
+      </ul>
+      <p v-else>Дела не найдены.</p>
+    </div>
+    <button class="todo__new-post" @click="openModal" type="button">
+      <span class="visually-hidden">Создать новую заметку.</span>
+    </button>
   </div>
-  <button class="todo__new-post" @click="addNewNote" type="button">
-    <span class="visually-hidden">Создать новую заметку.</span>
-  </button>
 
   <div class="modal" :class="{ 'modal--show': modalShow }">
     <div class="modal__content">
       <h2 class="modal__title">New Note</h2>
-      <form action="/">
-        <input type="text" placeholder="Input your note..." v-model="newTask"/>
-        <button @click="addNewTask" type="button">Apply</button>
+      <form @submit.prevent="addNewTask">
+        <input type="text" placeholder="Input your note..." v-model="newTask" />
+        <button type="submit">Apply</button>
         <button @click="closeModal" type="button">Cancel</button>
       </form>
     </div>
@@ -48,34 +68,63 @@
 </template>
 
 <script>
-import { remove } from '@vue/shared';
-import { toHandlers } from 'vue';
-
 export default {
   data() {
     return {
       modalShow: false,
-      todos: [
-        {id: 1, task: 'Купить продуктов', status: 'incomplete'}
-      ],
-      id: 2
+      newTask: "",
+      todos: [{ id: 1, task: "Купить продуктов", done: false }],
+      id: 2,
+      searchModes: ["all", "complete", "incomplete"],
+      searchMode: "all",
+      searchText: "",
+      searchFilter: ""
     };
   },
   methods: {
-    addNewNote() {
+    openModal() {
       this.modalShow = true;
     },
+
     addNewTask() {
-      const obj = {id: ++this.id, task: this.newTask, status: 'incomplete'};
+      if (this.newTask === "") {
+        return;
+      }
+      const obj = {
+        id: ++this.id,
+        task: this.newTask,
+        done: false,
+      };
       this.todos.push(obj);
-      this.modalShow = false;
+      this.newTask = "";
+      this.closeModal();
     },
+
     closeModal() {
       this.modalShow = false;
     },
-    deleteNote(event) {
 
-    }
+    editNote() {},
+
+    deleteNote(id) {
+      this.todos = this.todos.filter((elem) => elem.id !== id);
+    },
+  },
+  computed: {
+    filteredTodos() {
+      return this.todos.filter(({ done, task }) => {
+        const searchCondition = this.searchFilter
+          ? task.toLowerCase().includes(this.searchFilter)
+          : true;
+        if (this.searchMode === "complete") {
+          return done && searchCondition;
+        }
+        if (this.searchMode === "incomplete") {
+          return !done && searchCondition;
+        }
+        return searchCondition;
+      });
+    },
   },
 };
 </script>
@@ -127,12 +176,16 @@ input[type="text"] {
   box-sizing: border-box;
 }
 
-.todo {
-  display: grid;
-  grid-template-columns: 1fr 140px 54px;
+.todo-wrapper {
   width: 750px;
   margin-right: auto;
   margin-left: auto;
+}
+
+.todo {
+  display: grid;
+  grid-template-columns: 1fr 140px 54px;
+  margin-bottom: 40px;
 }
 
 .todo__title {
@@ -245,6 +298,11 @@ input[type="text"] {
   background-color: #6c63ff;
 }
 
+.todo-list__checkbox:checked + p {
+  color: rgba(0, 0, 0, 0.3);
+  text-decoration: line-through;
+}
+
 .todo-list__edit,
 .todo-list__delete {
   position: relative;
@@ -303,8 +361,9 @@ input[type="text"] {
 .todo__new-post::before {
   content: "";
   position: absolute;
-  top: 11px;
-  left: 13px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 24px;
   height: 24px;
   background-image: url("../src/assets/plus.svg");
