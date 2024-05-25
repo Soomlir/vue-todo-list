@@ -25,7 +25,7 @@
       <ul class="todo__list" v-if="filteredTodos.length">
         <li
           class="todo-list__item"
-          v-for="item in filteredTodos"
+          v-for="(item, i) in filteredTodos"
           :key="item.id"
         >
           <label>
@@ -36,7 +36,11 @@
             />
             <p>{{ item.task }}</p>
           </label>
-          <button class="todo-list__edit" type="button">
+          <button
+            @click="openModal(i)"
+            class="todo-list__edit"
+            type="button"
+          >
             <span class="visually-hidden">Редактировать запись.</span>
           </button>
           <button
@@ -50,18 +54,27 @@
       </ul>
       <p v-else>Дела не найдены.</p>
     </div>
-    <button class="todo__new-post" @click="openModal" type="button">
+    <button class="todo__new-post" @click="openModal(-1)" type="button">
       <span class="visually-hidden">Создать новую заметку.</span>
     </button>
   </div>
 
   <div class="modal" :class="{ 'modal--show': modalShow }">
     <div class="modal__content">
-      <h2 class="modal__title">New Note</h2>
-      <form @submit.prevent="addNewTask">
-        <input type="text" placeholder="Input your note..." v-model="newTask" />
-        <button type="submit">Apply</button>
-        <button @click="closeModal" type="button">Cancel</button>
+      <h2 class="modal__title">{{ isEditMode ? 'Редактировать' : 'Добавить' }} заметку</h2>
+      <form>
+        <input
+          class="modal__input"
+          type="text"
+          placeholder="Input your note..."
+          v-model.trim="inputValue"
+        />
+        <button @click="applyValue" class="modal__apply" type="button">
+          Apply
+        </button>
+        <button class="modal__cancel" @click="closeModal" type="button">
+          Cancel
+        </button>
       </form>
     </div>
   </div>
@@ -72,45 +85,56 @@ export default {
   data() {
     return {
       modalShow: false,
-      newTask: "",
+      inputValue: "",
       todos: [{ id: 1, task: "Купить продуктов", done: false }],
       id: 2,
       searchModes: ["all", "complete", "incomplete"],
       searchMode: "all",
       searchText: "",
-      searchFilter: ""
+      searchFilter: "",
+      indexOfEdited: -1,
     };
   },
   methods: {
-    openModal() {
+    openModal(i) {
+      this.indexOfEdited = i;
+      if (i > -1) {
+        this.inputValue = this.todos[i].task;
+      }
       this.modalShow = true;
     },
 
-    addNewTask() {
-      if (this.newTask === "") {
-        return;
-      }
-      const obj = {
-        id: ++this.id,
-        task: this.newTask,
-        done: false,
-      };
-      this.todos.push(obj);
-      this.newTask = "";
-      this.closeModal();
-    },
-
     closeModal() {
+      this.inputValue = "";
       this.modalShow = false;
     },
 
-    editNote() {},
+    applyValue() {
+      if (this.isEditMode) {
+        const currentNote = this.todos[this.indexOfEdited];
+        if (this.inputValue === "") {
+          this.deleteNote(currentNote.id);
+        } else {
+          currentNote.task = this.inputValue;
+        }
+      } else if (this.inputValue !== "") {
+        this.todos.push({
+          id: ++this.id,
+          task: this.inputValue,
+          done: false,
+        });
+      }
+      this.closeModal();
+    },
 
     deleteNote(id) {
       this.todos = this.todos.filter((elem) => elem.id !== id);
     },
   },
   computed: {
+    isEditMode() {
+      return this.indexOfEdited > -1;
+    },
     filteredTodos() {
       return this.todos.filter(({ done, task }) => {
         const searchCondition = this.searchFilter
@@ -367,5 +391,63 @@ input[type="text"] {
   width: 24px;
   height: 24px;
   background-image: url("../src/assets/plus.svg");
+}
+
+.modal form {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.modal__input {
+  flex-grow: 1;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  border: 1px solid #6c63ff;
+  border-radius: 5px;
+}
+
+.modal__apply,
+.modal__cancel {
+  width: 110px;
+  padding: 10px 20px;
+  margin-top: 120px;
+  font-weight: 500;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modal__apply {
+  color: #ffffff;
+  background-color: #6c63ff;
+}
+
+.modal__apply:focus,
+.modal__apply:hover {
+  background-color: rgba(108, 99, 255, 0.6);
+}
+
+.modal__apply:active {
+  background-color: rgba(108, 99, 255, 0.3);
+}
+
+.modal__cancel {
+  margin-left: auto;
+  color: #6c63ff;
+  background-color: #ffffff;
+  border: 1px solid #6c63ff;
+}
+
+.modal__cancel:focus,
+.modal__cancel:hover {
+  background-color: rgba(108, 99, 255, 0.6);
+  color: #ffffff;
+}
+
+.modal__cancel:active {
+  color: #ffffff;
+  background-color: rgba(108, 99, 255, 0.3);
 }
 </style>
