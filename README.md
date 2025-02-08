@@ -8,4 +8,4 @@
 - vue
 
 
-[Опубликованная версия](https:// soomlir.github.io/vue-todo-list/)
+[Опубликованная версия](https://soomlir.github.io/vue-todo-list/)
