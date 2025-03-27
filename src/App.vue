@@ -1,81 +1,81 @@
 <template>
-  <div class="todo-wrapper">
-    <div class="todo">
-      <h1 class="todo__title">Todo list</h1>
-      <form class="todo__form" action="/">
-        <input
-          class="todo__input"
-          type="text"
-          name="text"
-          placeholder="Search note..."
-          v-model="searchFilter"
-        />
-        <select class="todo__select" v-model="searchMode">
-          <option
-            v-for="mode in searchModes"
-            :key="mode"
-            :selected="mode === searchMode"
-          >
-            {{ mode }}
-          </option>
-        </select>
-        <button class="todo__theme-toggle" type="button"></button>
-      </form>
+  <div :class="{ 'todo-bg': themeToggle }">
+    <div class="todo-wrapper">
+      <div class="todo">
+        <h1 class="todo__title">Todo list</h1>
+        <form class="todo__form">
+          <input
+            class="todo__input"
+            type="text"
+            name="text"
+            placeholder="Search note..."
+            v-model="searchFilter"
+          />
+          <select class="todo__select" v-model="searchMode">
+            <option
+              v-for="mode in searchModes"
+              :key="mode"
+              :selected="mode === searchMode"
+            >
+              {{ mode }}
+            </option>
+          </select>
+          <button class="todo__theme-toggle" @click="toggleTheme" type="button">
+            <span class="visually-hidden">Сменить тему.</span>
+          </button>
+        </form>
 
-      <ul class="todo__list" v-if="filteredTodos.length">
-        <li
-          class="todo-list__item"
-          v-for="(item, i) in filteredTodos"
-          :key="item.id"
-        >
-          <label>
-            <input
-              class="todo-list__checkbox"
-              type="checkbox"
-              v-model="item.done"
-            />
-            <p>{{ item.task }}</p>
-          </label>
-          <button
-            @click="openModal(i)"
-            class="todo-list__edit"
-            type="button"
+        <ul class="todo__list" v-if="filteredTodos.length">
+          <li
+            class="todo-list__item"
+            v-for="(item, i) in filteredTodos"
+            :key="item.id"
           >
-            <span class="visually-hidden">Редактировать запись.</span>
-          </button>
-          <button
-            @click="deleteNote(item.id)"
-            class="todo-list__delete"
-            type="button"
-          >
-            <span class="visually-hidden">Удалить запись.</span>
-          </button>
-        </li>
-      </ul>
-      <p v-else>Дела не найдены.</p>
+            <label>
+              <input
+                class="todo-list__checkbox"
+                type="checkbox"
+                v-model="item.done"
+              />
+              <p class="todo-list__text">{{ item.task }}</p>
+            </label>
+            <button @click="openModal(i)" class="todo-list__edit" type="button">
+              <span class="visually-hidden">Редактировать запись.</span>
+            </button>
+            <button
+              @click="deleteNote(item.id)"
+              class="todo-list__delete"
+              type="button"
+            >
+              <span class="visually-hidden">Удалить запись.</span>
+            </button>
+          </li>
+        </ul>
+        <p class="todo__warning" v-else>Things are not found</p>
+      </div>
+      <button class="todo__new-post" @click="openModal(-1)" type="button">
+        <span class="visually-hidden">Создать новую заметку.</span>
+      </button>
     </div>
-    <button class="todo__new-post" @click="openModal(-1)" type="button">
-      <span class="visually-hidden">Создать новую заметку.</span>
-    </button>
-  </div>
 
-  <div class="modal" :class="{ 'modal--show': modalShow }">
-    <div class="modal__content">
-      <h2 class="modal__title">{{ isEditMode ? 'Редактировать' : 'Добавить' }} заметку</h2>
-      <form>
-        <input
-          class="modal__input"
-          type="text"
-          placeholder="Input your note..."
-          v-model.trim="inputValue"
-        />
-        <button @click="applyValue" class="modal__apply" type="button">
-          Apply
-        </button>
-        <button class="modal__cancel" @click="closeModal" type="button">
-          Cancel
-        </button>
-      </form>
+    <div class="modal" :class="{ 'modal--show': modalShow }">
+      <div class="modal__content">
+        <h2 class="modal__title">{{ isEditMode ? "Edit" : "Add" }} note</h2>
+        <form>
+          <input
+            class="modal__input"
+            type="text"
+            placeholder="Input your note..."
+            v-model.trim="inputValue"
+          />
+          <button @click="applyValue" class="modal__apply" type="button">
+            Apply
+          </button>
+          <button class="modal__cancel" @click="closeModal" type="button">
+            Cancel
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -86,16 +86,21 @@ export default {
     return {
       modalShow: false,
       inputValue: "",
-      todos: [{ id: 1, task: "Купить продуктов", done: false }],
+      todos: [{ id: 1, task: "Buy products", done: false }],
       id: 2,
       searchModes: ["all", "complete", "incomplete"],
       searchMode: "all",
       searchText: "",
       searchFilter: "",
       indexOfEdited: -1,
+      themeToggle: false,
     };
   },
   methods: {
+    toggleTheme() {
+      this.themeToggle = !this.themeToggle;
+    },
+
     openModal(i) {
       this.indexOfEdited = i;
       if (i > -1) {
@@ -200,6 +205,21 @@ input[type="text"] {
   box-sizing: border-box;
 }
 
+.todo-bg {
+  width: 100vw;
+  height: 100vh;
+  background-color: #000000;
+}
+
+.todo-bg .todo__title,
+.todo-bg .todo-list__text {
+  color: #ffffff;
+}
+
+.todo-bg .todo__warning {
+  color: #ffffff;
+}
+
 .todo-wrapper {
   width: 750px;
   margin-right: auto;
@@ -279,7 +299,7 @@ input[type="text"] {
   width: 22px;
   height: 22px;
   background-color: #ffffff;
-  mask: url("/src/assets/moon.svg") no-repeat;
+  mask: url("../src/assets/moon.svg") no-repeat;
   mask-size: 100%;
 }
 
@@ -316,7 +336,7 @@ input[type="text"] {
 }
 
 .todo-list__checkbox:checked {
-  background-image: url("src/assets/checkbox-on.svg");
+  background-image: url("../src/assets/checkbox-on.svg");
   background-repeat: no-repeat;
   background-position: center;
   background-color: #6c63ff;
@@ -324,6 +344,15 @@ input[type="text"] {
 
 .todo-list__checkbox:checked + p {
   color: rgba(0, 0, 0, 0.3);
+  text-decoration: line-through;
+}
+
+.todo-bg .todo-list__checkbox:checked {
+  color: #ffffff;
+}
+
+.todo-bg .todo-list__checkbox:checked + p {
+  color: rgba(255, 255, 255, 0.3);
   text-decoration: line-through;
 }
 
@@ -350,7 +379,7 @@ input[type="text"] {
   left: 0;
   width: 18px;
   height: 18px;
-  background-image: url("src/assets/pencil.svg");
+  background-image: url("../src/assets/pencil.svg");
   background-repeat: no-repeat;
   background-position: center;
 }
@@ -366,7 +395,7 @@ input[type="text"] {
   left: 0;
   width: 18px;
   height: 18px;
-  background-image: url("src/assets/trash.svg");
+  background-image: url("../src/assets/trash.svg");
   background-repeat: no-repeat;
   background-position: center;
 }
@@ -449,5 +478,13 @@ input[type="text"] {
 .modal__cancel:active {
   color: #ffffff;
   background-color: rgba(108, 99, 255, 0.3);
+}
+
+.todo-bg .modal__content {
+  background-color: #000000;
+}
+
+.todo-bg .modal__title {
+  color: #ffffff;
 }
 </style>
