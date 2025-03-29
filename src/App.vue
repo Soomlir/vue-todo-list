@@ -51,7 +51,7 @@
             </button>
           </li>
         </ul>
-        <p class="todo__warning" v-else>Things are not found</p>
+        <p class="todo__warning" v-else>Not found notes</p>
       </div>
       <button class="todo__new-post" @click="openModal(-1)" type="button">
         <span class="visually-hidden">Создать новую заметку.</span>
