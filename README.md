@@ -6,6 +6,3 @@
 - html
 - css
 - vue
-
-
-[Опубликованная версия](https://soomlir.github.io/vue-todo-list/)
